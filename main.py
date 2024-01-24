@@ -192,8 +192,9 @@ if __name__ == '__main__':
                 ner_label = data[1].to(device)
                 re_label = data[2].to(device)
                 mask = data[-1].to(device)
-
+                print(text.shape)
                 print(ner_label.shape)
+                print(re_label.shape)
                 ner_pred, re_pred = model(text, mask)
                 loss = BCEloss(ner_pred, ner_label, re_pred, re_label)
 
