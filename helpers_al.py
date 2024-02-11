@@ -389,6 +389,7 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
             mask = mask.to(device)
 
             with torch.no_grad():
+                _,_,_,latents = task_model(images,mask)
                 images = tokenizer(images, return_tensors="pt",
                                   padding='longest',
                                   is_split_into_words=True)#.to(device)
@@ -408,7 +409,7 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
 
                 # r = ranker(features)
                 images = images.to(device)
-                _,_,_,latents = task_model(images,mask)
+                
                 latents = latents.reshape([latents.shape[0],512*12*12])
 
                 latents = latents.view(latents.shape[0], 16, 16, 288)
