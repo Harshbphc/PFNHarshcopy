@@ -389,7 +389,7 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
             mask = mask.to(device)
 
             with torch.no_grad():
-                _,_,_,latents = task_model(images,mask)
+                ner_score,re_score,features,latents = task_model(images,mask)
                 images = tokenizer(images, return_tensors="pt",
                                   padding='longest',
                                   is_split_into_words=True)#.to(device)
@@ -425,13 +425,23 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
 
             preds = preds.cpu().data
             all_preds.extend(preds)
-            # weighted_preds = ner_score*weights[0] + re_score*weights[1]
+            weighted_preds = ner_score + re_score
+            # all_indices.extend(indices)
+            weighted_preds = weighted_preds.unsqueeze(1)
+            weighted_preds = weighted_preds.cpu().data
+            weights_list.extend(weighted_preds)
             # all_indices.extend(indices)
 
+        
+        weights_list = torch.stack(weights_list)
+        weights_list = weights_list.view(-1)
         all_preds = torch.stack(all_preds)
         all_preds = all_preds.view(-1)
         # need to multiply by -1 to be able to use torch.topk 
         all_preds *= -1
+        # print(all_preds)
+        # print(weights_list)
+        all_preds = all_preds*weights_list
         # select the points which the discriminator things are the most likely to be unlabeled
         _, arg = torch.sort(all_preds) 
         #saved_history/models/
