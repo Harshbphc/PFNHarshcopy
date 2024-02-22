@@ -456,6 +456,7 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
         variance = np.var(np.array(all_preds),axis=0)
 
         all_preds = all_preds + variance
+        print(variance.shape)
         # select the points which the discriminator things are the most likely to be unlabeled
         _, arg = torch.sort(all_preds) 
         #saved_history/models/
