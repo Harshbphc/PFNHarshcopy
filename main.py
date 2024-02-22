@@ -363,7 +363,8 @@ if __name__ == '__main__':
             labeled_set += list(torch.tensor(subset)[arg][-30:].numpy())
             listd = list(torch.tensor(subset)[arg][:-30].numpy()) 
             unlabeled_set = listd + unlabeled_set[50:]
-            print(len(labeled_set), min(labeled_set), max(labeled_set))
+            # print(len(labeled_set), min(labeled_set), max(labeled_set))
+            print(len(labeled_set))
             
             np.save("labelled-" + 'head' + str(cycle) + ".npy", np.array(labeled_set))
             #saved_history/
