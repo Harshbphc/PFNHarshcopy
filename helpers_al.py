@@ -461,8 +461,8 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
         # print(weights_list)
         all_preds = all_preds*weights_list
 
-        all_preds = all_preds + variance_list
-        print(variance_list)
+        all_preds = all_preds
+        # print(variance_list)
         # select the points which the discriminator things are the most likely to be unlabeled
         _, arg = torch.sort(all_preds) 
         #saved_history/models/
