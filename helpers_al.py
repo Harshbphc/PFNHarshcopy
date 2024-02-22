@@ -438,6 +438,8 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
             all_preds.extend(preds)
             weighted_preds = ner_score*task_model.w1 + re_score*task_model.w2
 
+            ner_score = ner_score*torch.log2(ner_score)
+            re_score = re_score*torch.log2(re_score)
             mean_vec = (ner_score + re_score)/2
             variance = torch.square(ner_score-mean_vec)+ torch.square(re_score-mean_vec)
             variance = variance/2
