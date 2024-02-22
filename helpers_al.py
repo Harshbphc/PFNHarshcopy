@@ -436,6 +436,10 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
             preds = preds.cpu().data
             all_preds.extend(preds)
             weighted_preds = ner_score*task_model.w1 + re_score*task_model.w2
+
+            mean_vec = (ner_score + re_score)/2
+            variance = np.square(ner_score-mean_vec)+ np.square(re_score-mean_vec)
+            variance = variance/2
             # weighted_preds = ner_score + re_score
             weighted_preds = weighted_preds.unsqueeze(1)
             weighted_preds = weighted_preds.cpu().data
@@ -452,8 +456,6 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
         # print(all_preds)
         # print(weights_list)
         all_preds = all_preds*weights_list
-
-        variance = np.var(np.array(all_preds),axis=0)
 
         all_preds = all_preds + variance
         print(variance)
