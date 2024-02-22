@@ -286,7 +286,7 @@ if __name__ == '__main__':
         rel2idx = json.load(f)
 
     train_dataset, test_dataset, dev_dataset, collate_fn, train_unlabeled = dataloader(args, ner2idx, rel2idx)
-
+    print(len(train_dataset))
     adden = 50 # roughly no_train/cycles
     no_train = len(train_dataset)
     ADDENDUM = adden
