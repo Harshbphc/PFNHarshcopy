@@ -468,7 +468,7 @@ def get_kcg(models, labeled_data_size, unlabeled_loader):
 def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, args, collate_fn):
     unlabeled_loader = DataLoader(data_unlabeled, batch_size=args.batch_size, 
                                     sampler=SubsetSequentialSampler(subset+labeled_set), # more convenient if we maintain the order of subset
-                                    pin_memory=True)
+                                    pin_memory=True,collate_fn= collate_fn)
 
     arg = get_kcg(model, 50*(cycle+1), unlabeled_loader)
 
