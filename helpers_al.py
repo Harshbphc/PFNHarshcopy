@@ -454,8 +454,6 @@ def get_kcg(models, labeled_data_size, unlabeled_loader):
             inputs = data[0]
             mask = data[-1]
             mask = mask.to(device)
-            with torch.cuda.device(0):
-                inputs = inputs.cuda()
             _, _,_, features_batch = models['backbone'](inputs,mask)
             features = torch.cat((features, features_batch), 0)
         feat = features.detach().cpu().numpy()
