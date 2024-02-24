@@ -446,14 +446,17 @@ def get_kcg(models, labeled_data_size, unlabeled_loader):
     models['backbone'].eval()
     with torch.cuda.device(0):
         features = torch.tensor([]).cuda()
-
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
     SUBSET = 50
     ADDENDUM = 50
     with torch.no_grad():
-        for inputs, _, _ in unlabeled_loader:
+        for data in unlabeled_loader:                       
+            inputs = data[0]
+            mask = data[-1]
+            mask = mask.to(device)
             with torch.cuda.device(0):
                 inputs = inputs.cuda()
-            _, _,_, features_batch = models['backbone'](inputs)
+            _, _,_, features_batch = models['backbone'](inputs,mask)
             features = torch.cat((features, features_batch), 0)
         feat = features.detach().cpu().numpy()
         new_av_idx = np.arange(SUBSET,(SUBSET + labeled_data_size))
