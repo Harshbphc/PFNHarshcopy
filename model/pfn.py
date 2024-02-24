@@ -327,6 +327,8 @@ class PFN(nn.Module):
         out3 = self.conv22(out2)
         out4 = self.conv33(out3)
 
+        out = F.avg_pool2d(out4, 4)
+        outf = out.view(out.size(0), -1)
         
         x = x.transpose(0, 1)
         # print("after transpose")
@@ -341,5 +343,5 @@ class PFN(nn.Module):
         re_core = self.re(h_re, h_share, mask)
         # print(re_core.shape)
         features = [out1,out2,out3,out4]
-        return ner_score, re_core, features
+        return ner_score, re_core, features, outf
 

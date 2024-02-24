@@ -7,6 +7,122 @@ import torch.optim as optim
 from torch.utils.data import Dataset,DataLoader
 from transformers import AutoTokenizer, AutoModel, AlbertTokenizer, AlbertModel
 from torch.utils.tensorboard import SummaryWriter
+from sklearn.metrics import pairwise_distances
+import abc
+
+class SamplingMethod(object):
+  __metaclass__ = abc.ABCMeta
+
+  @abc.abstractmethod
+  def __init__(self, X, y, seed, **kwargs):
+    self.X = X
+    self.y = y
+    self.seed = seed
+
+  def flatten_X(self):
+    shape = self.X.shape
+    flat_X = self.X
+    if len(shape) > 2:
+      flat_X = np.reshape(self.X, (shape[0],np.product(shape[1:])))
+    return flat_X
+
+
+  @abc.abstractmethod
+  def select_batch_(self):
+    return
+
+  def select_batch(self, **kwargs):
+    return self.select_batch_(**kwargs)
+
+  def select_batch_unc_(self, **kwargs):
+      return self.select_batch_unc_(**kwargs)
+
+  def to_dict(self):
+    return None
+  
+class kCenterGreedy(SamplingMethod):
+
+    def __init__(self, X,  metric='euclidean'):
+        self.X = X
+        # self.y = y
+        self.flat_X = self.flatten_X()
+        self.name = 'kcenter'
+        self.features = self.flat_X
+        self.metric = metric
+        self.min_distances = None
+        self.max_distances = None
+        self.n_obs = self.X.shape[0]
+        self.already_selected = []
+
+    def update_distances(self, cluster_centers, only_new=True, reset_dist=False):
+        """Update min distances given cluster centers.
+        Args:
+          cluster_centers: indices of cluster centers
+          only_new: only calculate distance for newly selected points and update
+            min_distances.
+          rest_dist: whether to reset min_distances.
+        """
+
+        if reset_dist:
+          self.min_distances = None
+        if only_new:
+          cluster_centers = [d for d in cluster_centers
+                            if d not in self.already_selected]
+        if cluster_centers:
+          x = self.features[cluster_centers]
+          # Update min_distances for all examples given new cluster center.
+          dist = pairwise_distances(self.features, x, metric=self.metric)#,n_jobs=4)
+
+          if self.min_distances is None:
+            self.min_distances = np.min(dist, axis=1).reshape(-1,1)
+          else:
+            self.min_distances = np.minimum(self.min_distances, dist)
+
+    def select_batch_(self, already_selected, N, **kwargs):
+        """
+        Diversity promoting active learning method that greedily forms a batch
+        to minimize the maximum distance to a cluster center among all unlabeled
+        datapoints.
+        Args:
+          model: model with scikit-like API with decision_function implemented
+          already_selected: index of datapoints already selected
+          N: batch size
+        Returns:
+          indices of points selected to minimize distance to cluster centers
+        """
+
+        try:
+          # Assumes that the transform function takes in original data and not
+          # flattened data.
+          print('Getting transformed features...')
+        #   self.features = model.transform(self.X)
+          print('Calculating distances...')
+          self.update_distances(already_selected, only_new=False, reset_dist=True)
+        except:
+          print('Using flat_X as features.')
+          self.update_distances(already_selected, only_new=True, reset_dist=False)
+
+        new_batch = []
+
+        for _ in range(N):
+          if self.already_selected is None:
+            # Initialize centers with a randomly selected datapoint
+            ind = np.random.choice(np.arange(self.n_obs))
+          else:
+            ind = np.argmax(self.min_distances)
+          # New examples should not be in already selected since those points
+          # should have min_distance of zero to a cluster center.
+          assert ind not in already_selected
+
+          self.update_distances([ind], only_new=True, reset_dist=False)
+          new_batch.append(ind)
+        print('Maximum distance from cluster centers is %0.2f'
+                % max(self.min_distances))
+
+
+        self.already_selected = already_selected
+
+        return new_batch
 
 class SubsetSequentialSampler(torch.utils.data.Sampler):
     r"""Samples elements sequentially from a given list of indices, without replacement.
@@ -326,86 +442,33 @@ def train_vaal(models, optimizers, labeled_dataloader, unlabeled_dataloader, cyc
                 SummaryWriter('logs/SCIERC_Train').add_scalar(str(cycle) + ' Total DSC Loss ',
                         dsc_loss.item(), iter_count)
 
+def get_kcg(models, labeled_data_size, unlabeled_loader):
+    models['backbone'].eval()
+    with torch.cuda.device(0):
+        features = torch.tensor([]).cuda()
+
+    SUBSET = 50
+    ADDENDUM = 50
+    with torch.no_grad():
+        for inputs, _, _ in unlabeled_loader:
+            with torch.cuda.device(0):
+                inputs = inputs.cuda()
+            _, _,_, features_batch = models['backbone'](inputs)
+            features = torch.cat((features, features_batch), 0)
+        feat = features.detach().cpu().numpy()
+        new_av_idx = np.arange(SUBSET,(SUBSET + labeled_data_size))
+        sampling = kCenterGreedy(feat)  
+        batch = sampling.select_batch_(new_av_idx, ADDENDUM)
+        other_idx = [x for x in range(SUBSET) if x not in batch]
+    return  other_idx + batch
+
 def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, args, collate_fn):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    if args.embed_mode == 'albert':
-        tokenizer = AlbertTokenizer.from_pretrained("albert-xxlarge-v1")
-        bert = AlbertModel.from_pretrained("albert-xxlarge-v1")
-    elif args.embed_mode == 'bert_cased':
-        tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
-        bert = AutoModel.from_pretrained("bert-base-cased")
-    elif args.embed_mode == 'scibert':
-        tokenizer = AutoTokenizer.from_pretrained("allenai/scibert_scivocab_uncased")
-        bert = AutoModel.from_pretrained("allenai/scibert_scivocab_uncased")
-     
-    if method == 'TA-VAAL':
-        # Create unlabeled dataloader for the unlabeled subset
-        unlabeled_loader = DataLoader(data_unlabeled, batch_size=args.batch_size, 
-                                    sampler=SubsetSequentialSampler(subset), 
-                                    pin_memory=True, collate_fn= collate_fn)
-        labeled_loader = DataLoader(data_unlabeled, batch_size=args.batch_size, 
-                                    sampler=SubsetSequentialSampler(labeled_set), 
-                                    pin_memory=True, collate_fn= collate_fn)
-        
-        vae = VAE()
-        discriminator = Discriminator(32)
-     
-        models      = {'backbone': model['backbone'], 'module': model['module'], 'vae': vae, 'discriminator': discriminator}
-        
-        optim_vae = optim.Adam(vae.parameters(), lr=5e-4)
-        optim_discriminator = optim.Adam(discriminator.parameters(), lr=5e-4)
-        optimizers = {'vae': optim_vae, 'discriminator':optim_discriminator}
+    unlabeled_loader = DataLoader(data_unlabeled, batch_size=args.batch_size, 
+                                    sampler=SubsetSequentialSampler(subset+labeled_set), # more convenient if we maintain the order of subset
+                                    pin_memory=True)
 
-        train_vaal(models,optimizers, labeled_loader, unlabeled_loader, cycle+1, args)
-        task_model = models['backbone']
-        ranker = models['module']        
-        all_preds, all_indices = [], []
+    arg = get_kcg(model, 50*(cycle+1), unlabeled_loader)
 
-        for data in unlabeled_loader:                       
-            images = data[0]
-            mask = data[-1]
-            mask = mask.to(device)
-
-            with torch.no_grad():
-                _,_,features = task_model(images,mask)
-                images = tokenizer(images, return_tensors="pt",
-                                  padding='longest',
-                                  is_split_into_words=True)#.to(device)
-                images = bert(**images)[0]
-                desired_size = (images.shape[0], 100, 768)
-                pad_dimensions = []
-                for original_size, desired_size in zip(images.size(), desired_size):
-                    pad_size = max(0, desired_size - original_size)
-                    pad_dimensions.append(0)  # Pad with zeros at the end
-                    pad_dimensions.append(pad_size)
-        # Pad the tensor
-                pad_dimensions = tuple(pad_dimensions)
-                images= torch.nn.functional.pad(images, pad_dimensions)
-                images = images[:,:100,:]
-                images = images.reshape([images.shape[0], 3, 128, 200])
-                images = torch.nn.functional.interpolate(images, size=(96, 96), mode='bilinear', align_corners=False)
-
-                r = ranker(features)
-                images = images.to(device)
-                r = r.to(device)
-                _, _, mu, _ = vae(torch.sigmoid(r),images)
-                preds = discriminator(r,mu)
-
-            preds = preds.cpu().data
-            all_preds.extend(preds)
-            # all_indices.extend(indices)
-
-        all_preds = torch.stack(all_preds)
-        all_preds = all_preds.view(-1)
-        # need to multiply by -1 to be able to use torch.topk 
-        all_preds *= -1
-        # select the points which the discriminator things are the most likely to be unlabeled
-        _, arg = torch.sort(all_preds) 
-        #saved_history/models/
-        torch.save(vae, 'vae-' + 'head' +'cycle-'+str(cycle)+'.pth')
-        torch.save(discriminator, 'discriminator-' + 'head' +'cycle-'+str(cycle)+'.pth')
-        
     return arg
 
 def read_data(dataloader, labels=True):
