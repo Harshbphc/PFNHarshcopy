@@ -1,53 +1,28 @@
+from transformers import AutoTokenizer, AutoModel
+from datasets import load_dataset
+from datasets import Dataset
+from datasets import concatenate_datasets
 import torch
-import torch.nn as nn
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-class Unsqueezer(nn.Module):
-    def __init__(self):
-        super(Unsqueezer, self).__init__()
-        
-    def forward(self, x):
-        return torch.unsqueeze(x,1)
-    
-class Transposer(nn.Module):
-    def __init__(self):
-        super(Transposer, self).__init__()
+# Specify the directory where you want to store the dataset
+cache_dir = "/mnt/MIG_Store/Datasets/cc100/cc100/en-lang=en/0.0.0/8159941b93eb06d0288bb80be26ddfe8213c0c5e33286619c85ad8e1ee0eb91c"
 
-    def forward(self, x):
-        return torch.transpose(x, -1, -2)
-    
+# Load the dataset and specify the cache directory
+#dataset = load_dataset("cc100", lang="en", cache_dir=cache_dir, split="train")
+dataset = Dataset.from_file(cache_dir+"/cc100-train-00000-of-00720.arrow")
+for i in range (1,5): #change it to 720 from 20, this was for test
+    print("Reading..."+str(i)+" of 720")
+    temp = Dataset.from_file(cache_dir+"/cc100-train-"+format(i, '05d')+"-of-00720.arrow")
+    dataset = concatenate_datasets([dataset, temp])
 
-class ReshapeCNN(nn.Module):
-    def __init__(self):
-        super(ReshapeCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=2, padding=1)  # Convolution to downsample spatial dimensions
-        self.deconv = nn.ConvTranspose2d(64, 64, kernel_size=3, stride=2, padding=1, output_padding=1)  # Transposed convolution to upsample spatial dimensions
-        
-        self.linear_layer1 = torch.nn.Linear(768, 96)
-        self.linearlayer2 = torch.nn.Linear(100,96)
-        self.transposer = Transposer()
-        self.unsqueezer = Unsqueezer()
+tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+bert = AutoModel.from_pretrained("bert-base-cased")
 
-    def forward(self, x):
-        x = self.unsqueezer(x)
-        # Apply convolution to downsample spatial dimensions
-        x = self.conv1(x)
+for i in range (0,4):
+    x = tokenizer(dataset[i]['text'], return_tensors="pt",
+                                  padding='longest',
+                                  is_split_into_words=True).to(device)
 
-        # Apply transposed convolution to upsample spatial dimensions
-        x = self.deconv(x)
-        
-        x = self.linear_layer1(x)
-
-        x=self.transposer(x)
-
-        x = self.linearlayer2(x)
-
-        reducer = nn.Conv2d(64, 128, kernel_size=2, stride=2)
-        x = reducer(x)
-        return x
-
-tensor = torch.randn((16, 100, 768))
-
-
-model = ReshapeCNN()
-output_tensor = model(tensor)
-print(output_tensor.shape)
+    x = bert(**x)[0]
+    print(x)
