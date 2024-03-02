@@ -380,6 +380,16 @@ if __name__ == '__main__':
             mask = data[-1].to(device)
 
             ner_labpred, re_labpred, features = model(text, mask)
+            ner_labpred = ner_labpred.transpose(1,2)
+            ner_labpred = ner_labpred.transpose(0,1)
+            re_labpred = re_labpred.transpose(1,2)
+            re_labpred = re_labpred.transpose(0,1)
+
+            ner_labpred = torch.mean(ner_labpred, dim=(1, 2, 3), keepdim=True)
+            re_labpred = torch.mean(re_labpred, dim=(1, 2, 3), keepdim=True)
+
+            ner_labpred = torch.squeeze(ner_labpred)
+            re_labpred = torch.squeeze(re_labpred)
 
             lab_features = features[-1]
 
@@ -391,9 +401,20 @@ if __name__ == '__main__':
 
             ner_unlabpred, re_unlabpred, features = model(text, mask)
 
+            ner_unlabpred = ner_unlabpred.transpose(1,2)
+            ner_unlabpred = ner_unlabpred.transpose(0,1)
+            re_unlabpred = re_unlabpred.transpose(1,2)
+            re_unlabpred = re_unlabpred.transpose(0,1)
+
+            ner_unlabpred = torch.mean(ner_unlabpred, dim=(1, 2, 3), keepdim=True)
+            re_unlabpred = torch.mean(re_unlabpred, dim=(1, 2, 3), keepdim=True)
+
+            ner_unlabpred = torch.squeeze(ner_unlabpred)
+            re_unlabpred = torch.squeeze(re_unlabpred)
+
             unlab_features = features[-1]
     
-    tsne = TSNE(n_components=2,random_state=42,perplexity=50)
+    tsne = TSNE(n_components=2,random_state=42,perplexity=10)
 
     train_tsne = tsne.fit_transform(lab_features)
     test_tsne = tsne.fit_transform(unlab_features)
