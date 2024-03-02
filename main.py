@@ -18,7 +18,8 @@ import torch.nn.init as init
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data import Dataset,DataLoader
 from helpers_al import VAE, query_samples, Discriminator
-
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 def train(args, model, train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch):
     for epoch in range(args.epoch):#1
@@ -366,3 +367,49 @@ if __name__ == '__main__':
             train_batch = DataLoader(dataset=train_dataset, batch_size=args.batch_size, sampler=SubsetRandomSampler(labeled_set), 
                                         pin_memory=True, collate_fn=collate_fn)
 
+    labeled_batch = DataLoader(dataset=train_dataset, batch_size=len(labeled_set), sampler=SubsetRandomSampler(labeled_set), 
+                                        pin_memory=True, collate_fn=collate_fn)
+    unlabeled_batch = DataLoader(dataset=train_dataset, batch_size=len(unlabeled_set), sampler=SubsetRandomSampler(unlabeled_set), 
+                                        pin_memory=True, collate_fn=collate_fn)
+    
+    with torch.no_grad():
+        for data in labeled_batch:
+            text = data[0]
+            ner_label = data[1].to(device)
+            re_label = data[2].to(device)
+            mask = data[-1].to(device)
+
+            ner_labpred, re_labpred, features = model(text, mask)
+
+            lab_features = features[-1]
+
+        for data in unlabeled_batch:
+            text = data[0]
+            ner_label = data[1].to(device)
+            re_label = data[2].to(device)
+            mask = data[-1].to(device)
+
+            ner_unlabpred, re_unlabpred, features = model(text, mask)
+
+            unlab_features = features[-1]
+    
+    tsne = TSNE(n_components=2,random_state=42)
+
+    train_tsne = tsne.fit_transform(lab_features)
+    test_tsne = tsne.fit_transform(unlab_features)
+
+    # Step 5: Visualize t-SNE plots
+    plt.figure(figsize=(10, 5))
+
+    # Train t-SNE plot
+    plt.subplot(1, 2, 1)
+    plt.scatter(train_tsne[:, 0], train_tsne[:, 1], c=ner_labpred+re_labpred, cmap='viridis')
+    plt.title('Train t-SNE Plot')
+
+    # Test t-SNE plot
+    plt.subplot(1, 2, 2)
+    plt.scatter(test_tsne[:, 0], test_tsne[:, 1], c=ner_unlabpred+re_unlabpred, cmap='viridis')
+    plt.title('Test t-SNE Plot')
+
+    plt.tight_layout()
+    plt.show()
