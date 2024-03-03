@@ -368,9 +368,9 @@ if __name__ == '__main__':
                                         pin_memory=True, collate_fn=collate_fn)
 
     len(labeled_set)
-    labeled_batch = DataLoader(dataset=train_dataset, batch_size=50, sampler=SubsetRandomSampler(labeled_set), 
+    labeled_batch = DataLoader(dataset=train_dataset, batch_size=20, sampler=SubsetRandomSampler(labeled_set), 
                                         pin_memory=True, collate_fn=collate_fn)
-    unlabeled_batch = DataLoader(dataset=train_dataset, batch_size=50, sampler=SubsetRandomSampler(unlabeled_set), 
+    unlabeled_batch = DataLoader(dataset=train_dataset, batch_size=20, sampler=SubsetRandomSampler(unlabeled_set), 
                                         pin_memory=True, collate_fn=collate_fn)
     
     with torch.no_grad():
