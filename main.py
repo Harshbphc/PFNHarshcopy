@@ -18,6 +18,8 @@ import torch.nn.init as init
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data import Dataset,DataLoader
 from helpers_al import VAE, query_samples, Discriminator
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 
 def train(args, model, train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch):
@@ -371,3 +373,86 @@ if __name__ == '__main__':
             train_batch = DataLoader(dataset=train_dataset, batch_size=args.batch_size, sampler=SubsetRandomSampler(labeled_set), 
                                         pin_memory=True, collate_fn=collate_fn)
 
+    len(labeled_set)
+    labeled_batch = DataLoader(dataset=train_dataset, batch_size=len(labeled_set), sampler=SubsetRandomSampler(labeled_set), 
+                                        pin_memory=True, collate_fn=collate_fn)
+    unlabeled_batch = DataLoader(dataset=train_dataset, batch_size=len(unlabeled_set), sampler=SubsetRandomSampler(unlabeled_set), 
+                                        pin_memory=True, collate_fn=collate_fn)
+    
+    with torch.no_grad():
+        for data in labeled_batch:
+            text = data[0]
+            ner_label = data[1].to(device)
+            re_label = data[2].to(device)
+            mask = data[-1].to(device)
+
+            ner_labpred, re_labpred, features = model(text, mask)
+            ner_labpred = ner_labpred.transpose(1,2)
+            ner_labpred = ner_labpred.transpose(0,1)
+            re_labpred = re_labpred.transpose(1,2)
+            re_labpred = re_labpred.transpose(0,1)
+
+            ner_labpred = torch.mean(ner_labpred, dim=(1, 2, 3), keepdim=True)
+            re_labpred = torch.mean(re_labpred, dim=(1, 2, 3), keepdim=True)
+
+            ner_labpred = torch.squeeze(ner_labpred)
+            re_labpred = torch.squeeze(re_labpred)
+
+            lab_features = features[-1]
+
+        for data in unlabeled_batch:
+            text = data[0]
+            ner_label = data[1].to(device)
+            re_label = data[2].to(device)
+            mask = data[-1].to(device)
+
+            ner_unlabpred, re_unlabpred, features = model(text, mask)
+
+            ner_unlabpred = ner_unlabpred.transpose(1,2)
+            ner_unlabpred = ner_unlabpred.transpose(0,1)
+            re_unlabpred = re_unlabpred.transpose(1,2)
+            re_unlabpred = re_unlabpred.transpose(0,1)
+
+            ner_unlabpred = torch.mean(ner_unlabpred, dim=(1, 2, 3), keepdim=True)
+            re_unlabpred = torch.mean(re_unlabpred, dim=(1, 2, 3), keepdim=True)
+
+            ner_unlabpred = torch.squeeze(ner_unlabpred)
+            re_unlabpred = torch.squeeze(re_unlabpred)
+
+            unlab_features = features[-1]
+    
+    tsne = TSNE(n_components=2,random_state=42,perplexity=10)
+    print(lab_features.shape)
+    lab_features = lab_features.cpu()
+    unlab_features = unlab_features.cpu()
+
+    lab_features = lab_features.reshape(lab_features.shape[0],-1)
+    unlab_features = unlab_features.reshape(unlab_features.shape[0],-1)
+
+    train_tsne = tsne.fit_transform(lab_features)
+    test_tsne = tsne.fit_transform(unlab_features)
+
+    ner_labpred = ner_labpred.cpu()
+    re_labpred = re_labpred.cpu()
+    ner_unlabpred = ner_unlabpred.cpu()
+    re_unlabpred = re_unlabpred.cpu()
+    # Step 5: Visualize t-SNE plots
+    print("done tsne train")
+    print(train_tsne.shape)
+    plt.figure(figsize=(10, 5))
+
+    # Train t-SNE plot
+    plt.subplot(1, 2, 1)
+    plt.scatter(train_tsne[:, 0], train_tsne[:, 1],c='red')#, cmap='viridis')
+    plt.title('Train t-SNE Plot')
+
+    # Test t-SNE plot
+    plt.subplot(1, 2, 2)
+    plt.scatter(test_tsne[:, 0], test_tsne[:, 1], c='blue')#, cmap='viridis')
+    plt.title('Test t-SNE Plot')
+
+    plt.tight_layout()
+    plt.savefig('tsne_plot_our_method.png')
+    plt.show()
+
+    print("done plotting")
