@@ -422,10 +422,14 @@ if __name__ == '__main__':
 
     lab_features = lab_features.reshape(lab_features.shape[0],-1)
     unlab_features = unlab_features.reshape(unlab_features.shape[0],-1)
-    
+
     train_tsne = tsne.fit_transform(lab_features)
     test_tsne = tsne.fit_transform(unlab_features)
 
+    ner_labpred = ner_labpred.cpu()
+    re_labpred = re_labpred.cpu()
+    ner_unlabpred = ner_unlabpred.cpu()
+    re_unlabpred = re_unlabpred.cpu()
     # Step 5: Visualize t-SNE plots
     plt.figure(figsize=(10, 5))
 
