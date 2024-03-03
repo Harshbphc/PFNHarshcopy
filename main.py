@@ -417,6 +417,8 @@ if __name__ == '__main__':
     
     tsne = TSNE(n_components=2,random_state=42,perplexity=10)
     print(lab_features.shape)
+    lab_features = lab_features.cpu()
+    unlab_features = unlab_features.cpu()
     train_tsne = tsne.fit_transform(lab_features)
     test_tsne = tsne.fit_transform(unlab_features)
 
