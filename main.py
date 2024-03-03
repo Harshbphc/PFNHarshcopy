@@ -432,6 +432,7 @@ if __name__ == '__main__':
     re_unlabpred = re_unlabpred.cpu()
     # Step 5: Visualize t-SNE plots
     print("done tsne train")
+    print(train_tsne.shape)
     plt.figure(figsize=(10, 5))
 
     # Train t-SNE plot
