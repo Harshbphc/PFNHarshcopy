@@ -347,7 +347,7 @@ if __name__ == '__main__':
         for cycle in range(7):
             print(cycle)
             random.shuffle(unlabeled_set)
-            subset = unlabeled_set[:100]
+            subset = unlabeled_set[:200]
 
             train(args, models['backbone'], train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch)
             torch.save(models['backbone'], 'predictor-backbone-' + 'cycle-'+str(cycle+1)+'.pth')
@@ -357,7 +357,7 @@ if __name__ == '__main__':
             new_list = list(torch.tensor(subset)[arg][:10].numpy())
             labeled_set += list(torch.tensor(subset)[arg][-10:].numpy())
             listd = list(torch.tensor(subset)[arg][:-10].numpy()) 
-            unlabeled_set = listd + unlabeled_set[100:]
+            unlabeled_set = listd + unlabeled_set[10:]
             print(len(labeled_set), min(labeled_set), max(labeled_set))
             
             np.save("labelled-" + 'head' + str(cycle) + ".npy", np.array(labeled_set))
