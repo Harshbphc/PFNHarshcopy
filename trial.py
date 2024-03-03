@@ -1,53 +1,22 @@
+import matplotlib as plt
 import torch
-import torch.nn as nn
 
-class Unsqueezer(nn.Module):
-    def __init__(self):
-        super(Unsqueezer, self).__init__()
-        
-    def forward(self, x):
-        return torch.unsqueeze(x,1)
-    
-class Transposer(nn.Module):
-    def __init__(self):
-        super(Transposer, self).__init__()
+plt.figure(figsize=(10, 5))
 
-    def forward(self, x):
-        return torch.transpose(x, -1, -2)
-    
+    # Train t-SNE plot
+train_tsne = torch.rand([20,2])
+ner_labpred = torch.rand([20,1])
+re_labpred = torch.rand([20,1])
+plt.subplot(1, 2, 1)
+plt.scatter(train_tsne[:, 0], train_tsne[:, 1], c=ner_labpred+re_labpred, cmap='viridis')
+plt.title('Train t-SNE Plot')
 
-class ReshapeCNN(nn.Module):
-    def __init__(self):
-        super(ReshapeCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=2, padding=1)  # Convolution to downsample spatial dimensions
-        self.deconv = nn.ConvTranspose2d(64, 64, kernel_size=3, stride=2, padding=1, output_padding=1)  # Transposed convolution to upsample spatial dimensions
-        
-        self.linear_layer1 = torch.nn.Linear(768, 96)
-        self.linearlayer2 = torch.nn.Linear(100,96)
-        self.transposer = Transposer()
-        self.unsqueezer = Unsqueezer()
+    # Test t-SNE plot
+# plt.subplot(1, 2, 2)
+# plt.scatter(test_tsne[:, 0], test_tsne[:, 1], c=ner_unlabpred+re_unlabpred, cmap='viridis')
+# plt.title('Test t-SNE Plot')
 
-    def forward(self, x):
-        x = self.unsqueezer(x)
-        # Apply convolution to downsample spatial dimensions
-        x = self.conv1(x)
+plt.tight_layout()
+plt.show()
 
-        # Apply transposed convolution to upsample spatial dimensions
-        x = self.deconv(x)
-        
-        x = self.linear_layer1(x)
-
-        x=self.transposer(x)
-
-        x = self.linearlayer2(x)
-
-        reducer = nn.Conv2d(64, 128, kernel_size=2, stride=2)
-        x = reducer(x)
-        return x
-
-tensor = torch.randn((16, 100, 768))
-
-
-model = ReshapeCNN()
-output_tensor = model(tensor)
-print(output_tensor.shape)
+print("done plotting")
