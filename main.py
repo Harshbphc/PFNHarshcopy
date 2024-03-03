@@ -419,6 +419,10 @@ if __name__ == '__main__':
     print(lab_features.shape)
     lab_features = lab_features.cpu()
     unlab_features = unlab_features.cpu()
+
+    lab_features = lab_features.reshape(lab_features.shape[0],-1)
+    unlab_features = unlab_features.reshape(unlab_features.shape[0],-1)
+    
     train_tsne = tsne.fit_transform(lab_features)
     test_tsne = tsne.fit_transform(unlab_features)
 
