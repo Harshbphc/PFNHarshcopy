@@ -286,7 +286,7 @@ if __name__ == '__main__':
 
     train_dataset, test_dataset, dev_dataset, collate_fn, train_unlabeled = dataloader(args, ner2idx, rel2idx)
 
-    adden = 300 # roughly no_train/cycles
+    adden = 330 # roughly no_train/cycles
     no_train = len(train_dataset)
     ADDENDUM = adden
     NUM_TRAIN = no_train
@@ -347,17 +347,17 @@ if __name__ == '__main__':
         for cycle in range(7):
             print(cycle)
             random.shuffle(unlabeled_set)
-            subset = unlabeled_set[:300]
+            subset = unlabeled_set[:330]
 
             train(args, models['backbone'], train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch)
             torch.save(models['backbone'], 'predictor-backbone-' + 'cycle-'+str(cycle+1)+'.pth')
             torch.save(models['module'], 'predictor-module-'+'cycle-'+str(cycle+1)+'.pth')
             arg = query_samples(models, method, train_unlabeled, subset, labeled_set, cycle, args,collate_fn)
 
-            new_list = list(torch.tensor(subset)[arg][:10].numpy())
-            labeled_set += list(torch.tensor(subset)[arg][-10:].numpy())
-            listd = list(torch.tensor(subset)[arg][:-10].numpy()) 
-            unlabeled_set = listd + unlabeled_set[10:]
+            new_list = list(torch.tensor(subset)[arg][:3].numpy())
+            labeled_set += list(torch.tensor(subset)[arg][-3:].numpy())
+            listd = list(torch.tensor(subset)[arg][:-3].numpy()) 
+            unlabeled_set = listd + unlabeled_set[3:]
             print(len(labeled_set), min(labeled_set), max(labeled_set))
             
             np.save("labelled-" + 'head' + str(cycle) + ".npy", np.array(labeled_set))
