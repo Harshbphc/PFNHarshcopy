@@ -286,7 +286,7 @@ if __name__ == '__main__':
 
     train_dataset, test_dataset, dev_dataset, collate_fn, train_unlabeled = dataloader(args, ner2idx, rel2idx)
 
-    adden = 200 # roughly no_train/cycles
+    adden = 300 # roughly no_train/cycles
     no_train = len(train_dataset)
     ADDENDUM = adden
     NUM_TRAIN = no_train
@@ -347,7 +347,7 @@ if __name__ == '__main__':
         for cycle in range(7):
             print(cycle)
             random.shuffle(unlabeled_set)
-            subset = unlabeled_set[:200]
+            subset = unlabeled_set[:300]
 
             train(args, models['backbone'], train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch)
             torch.save(models['backbone'], 'predictor-backbone-' + 'cycle-'+str(cycle+1)+'.pth')
