@@ -462,11 +462,12 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
         all_preds = torch.stack(all_preds)
         all_preds = all_preds.view(-1)
         # need to multiply by -1 to be able to use torch.topk 
-        all_preds *= -1
+        
         # print(all_preds)
         # print(weights_list)
-        weights_list = weights_list - variance_list
-        all_preds = all_preds*weights_list
+        # weights_list = weights_list - variance_list
+        all_preds = weights_list
+        all_preds *= -1
 
         # print(variance_list)
         # select the points which the discriminator things are the most likely to be unlabeled
