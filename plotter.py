@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 
 # Data
 data = {
-    'coreset': [0.00625, 0, 0, 0.3862, 0.60075, 0.6405, 0.65975],
-    'vaal': [0.00625, 0, 0, 0, 0.40455, 0.5748, 0.66825],
-    'tavaal': [0.00355, 0, 0, 0, 0.40595, 0.57185, 0.65055],
-    'sraal': [0.00625, 0, 0, 0, 0.40585, 0.5545, 0.66305],
-    'our method': [0.00625, 0, 0, 0, 0.6078, 0.6912, 0.72415]
+    'coreset': [0.3944, 0.59095, 0.64035, 0.6685, 0.69405, 0.71955],
+    'vaal': [0.3666, 0.5066, 0.6198, 0.67535, 0.7187, 0.7473],
+    'tavaal': [0.3933, 0.5086, 0.60195, 0.6795, 0.6892, 0.7171],
+    'sraal': [0.3713, 0.51835, 0.61325, 0.64565, 0.67705, 0.69605],
+    'our method': [0.4025, 0.5608, 0.6763, 0.71605, 0.74725, 0.7688]
 }
 
 
@@ -16,22 +16,23 @@ for method, values in data.items():
 
 # Plot
 plt.figure(figsize=(10, 6))
+plt.gca().set_facecolor('lightgrey')  # Set background color to grey
 
 # Define markers
 markers = ['o', 's', '^', 'D', 'x']
 
 # Plot each line with different marker
 for i, (method, values) in enumerate(data.items()):
-    plt.plot(range(1, len(values) + 1), values, marker=markers[i % len(markers)], label=method)
+    plt.plot(range(1, len(values) + 1), values, marker=markers[i % len(markers)], label=method,linewidth=2)
 
-plt.title('Training Progress')
-plt.xlabel('Iteration')
-plt.ylabel('Accuracy')
+plt.title('WEBNLG')
+plt.xlabel('Training Samples')
+plt.ylabel('Mean Accuracy(%)')
 plt.legend()
 plt.grid(True)
 plt.xticks(range(1, len(data['coreset']) + 1))
-
-plt.savefig('/mnt/d/BITS_Acads/project/plots_al/training_progress_webnlg.png')
+plt.xticks(range(1, len(next(iter(data.values()))) + 1), [str(170 + i * 30) for i in range(len(next(iter(data.values()))))])
+plt.savefig('/mnt/d/BITS_Acads/project/plots_al/training_progress_WEBNLG_9cycles_final.png')
 
 # Show plot
 plt.show()
