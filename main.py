@@ -289,6 +289,7 @@ if __name__ == '__main__':
     adden = 50 # roughly no_train/cycles
     no_train = len(train_dataset)
     print(len(train_dataset))
+    print(len(test_dataset))
     ADDENDUM = adden
     NUM_TRAIN = no_train
     indices = list(range(NUM_TRAIN))
