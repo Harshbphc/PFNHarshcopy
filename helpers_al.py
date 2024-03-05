@@ -465,7 +465,7 @@ def query_samples(model, method, data_unlabeled, subset, labeled_set, cycle, arg
         all_preds *= -1
         # print(all_preds)
         # print(weights_list)
-        weights_list = weights_list - variance_list
+        weights_list = weights_list
         all_preds = all_preds*weights_list
 
         # print(variance_list)
