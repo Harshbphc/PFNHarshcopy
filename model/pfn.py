@@ -302,8 +302,8 @@ class PFN(nn.Module):
 
 
     def forward(self, x, mask):
-        print(x)
-        print(type(x))
+        # print(x)
+        # print(type(x))
         x = self.tokenizer(x, return_tensors="pt",
                                   padding='longest',
                                   is_split_into_words=True).to(device)
