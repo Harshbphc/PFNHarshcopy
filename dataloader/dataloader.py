@@ -172,7 +172,7 @@ def ade_and_sci_preprocess(data, dataset):
 def dataloader(args, ner2idx, rel2idx):
     path = args.data
 
-    if args.data == "/home/gamma/home/gamma/Workbenches/PFNHarshcopy/data/ADE":
+    if args.data == "/home/gamma/Workbenches/nlp_al/vaal/PFNHarshcopy/data/ADE":
         train_raw_data = json_load(path, "train_triples.json")
         test_data = json_load(path, "test_triples.json")
         random.shuffle(train_raw_data)
