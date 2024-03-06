@@ -103,9 +103,9 @@ if __name__ == '__main__':
     no_train = len(train_dataset)
     indices = list(range(no_train))
     model = PFN(args, input_size, ner2idx, rel2idx)
-    model = torch.load('predictor-backbone-cycle-5.pth')
-    labeled_setn = np.load('labelled-head4.npy')
-    labeled_setprev_ind = np.load('labelled-head3.npy')
+    model = torch.load('predictor-backbone-cycle-6.pth')
+    labeled_setn = np.load('labelled-head5.npy')
+    labeled_setprev_ind = np.load('labelled-head4.npy')
 
     unlabeled_set = [x for x in indices if x not in labeled_setn]
     unlabeled_set = unlabeled_set[:400]
@@ -173,10 +173,10 @@ if __name__ == '__main__':
 
         plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], label='Prev labelled samples',c='green')
 
-        plt.title('WEBNLG, Ours w DV - Cycle 5')
+        plt.title('WEBNLG, Ours w DV - Cycle 6')
         plt.tight_layout()
         plt.legend()
-        plt.savefig('tsne_plot_dyn_weight.png')
+        plt.savefig('tsne_plot_dyn_weight_cycle6.png')
         plt.show()
 
         print("done plotting")
