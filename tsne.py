@@ -171,10 +171,10 @@ if __name__ == '__main__':
         plt.figure(figsize=(10, 5))
 
         # Train t-SNE plot
-        plt.scatter(train_tsne[:len(lab_features), 0], train_tsne[:, 1],label='Newly added samples',c='red')
+        plt.scatter(train_tsne[:len(lab_features), 0], train_tsne[len(lab_features):, 1],label='Newly added samples',c='red')
 
         # Test t-SNE plot
-        plt.scatter(train_tsne[len(lab_features):len(lab_features)+len(unlab_features), 0], train_tsne[:, 1], label='Unlabeled samples',c='blue')
+        plt.scatter(train_tsne[len(lab_features):len(lab_features)+len(unlab_features), 0], train_tsne[len(lab_features):len(lab_features)+len(unlab_features), 1], label='Unlabeled samples',c='blue')
 
         plt.scatter(train_tsne[len(lab_features)+len(unlab_features):, 0], train_tsne[len(lab_features)+len(unlab_features):, 1], label='Prev labeled samples',c='green')
 
