@@ -155,6 +155,11 @@ if __name__ == '__main__':
         lab_features = lab_features.cpu()
         unlab_features = unlab_features.cpu()
         lab_featuresprev = lab_featuresprev.cpu()
+        lab_features = lab_features.reshape(lab_features.shape[0],-1)
+        unlab_features = unlab_features.reshape(unlab_features.shape[0],-1)
+        lab_featuresprev = lab_featuresprev.reshape(lab_featuresprev.shape[0],-1)
+
+        
         lab_features = lab_features.numpy()
         unlab_features = unlab_features.numpy()
         lab_featuresprev = lab_featuresprev.numpy()
