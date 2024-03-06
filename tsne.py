@@ -171,7 +171,7 @@ if __name__ == '__main__':
         # Test t-SNE plot
         plt.scatter(test_tsne[:, 0], test_tsne[:, 1], label='Unlabeled samples',c='blue')
 
-        plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], label='Prev labelled samples',c='green')
+        plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], label='Prev labeled samples',c='green')
 
         plt.title('WEBNLG, Ours w DV - Cycle 5')
         plt.tight_layout()
