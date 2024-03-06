@@ -110,7 +110,7 @@ if __name__ == '__main__':
     unlabeled_set = [x for x in indices if x not in labeled_setprev_ind]
     unlabeled_set = unlabeled_set[:400]
 
-    # labeled_setn = np.setdiff1d(labeled_setn, labeled_setprev_ind)
+    labeled_setn = np.setdiff1d(labeled_setn, labeled_setprev_ind)
 
 
     labeled_batchn = DataLoader(dataset=train_dataset, batch_size=len(labeled_setn), sampler=SubsetRandomSampler(labeled_setn), 
