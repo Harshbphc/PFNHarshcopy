@@ -107,7 +107,7 @@ if __name__ == '__main__':
     labeled_setn = np.load('labelled-head5.npy')
     labeled_setprev_ind = np.load('labelled-head4.npy')
 
-    unlabeled_set = [x for x in indices if x not in labeled_setn]
+    unlabeled_set = [x for x in indices if x not in labeled_setprev_ind]
     unlabeled_set = unlabeled_set[:400]
 
     # labeled_setn = np.setdiff1d(labeled_setn, labeled_setprev_ind)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
         unlab_features = unlab_features.reshape(unlab_features.shape[0],-1)
         lab_featuresprev = lab_featuresprev.reshape(lab_featuresprev.shape[0],-1)
 
-        
+
         lab_features = lab_features.numpy()
         unlab_features = unlab_features.numpy()
         lab_featuresprev = lab_featuresprev.numpy()
