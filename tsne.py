@@ -110,6 +110,8 @@ if __name__ == '__main__':
     unlabeled_set = [x for x in indices if x not in labeled_setn]
     unlabeled_set = unlabeled_set[:400]
 
+    labeled_setn = np.setdiff1d(labeled_setn, labeled_setprev_ind)
+
 
     labeled_batchn = DataLoader(dataset=train_dataset, batch_size=len(labeled_setn), sampler=SubsetRandomSampler(labeled_setn), 
                                         pin_memory=True, collate_fn=collate_fn)
@@ -171,8 +173,10 @@ if __name__ == '__main__':
 
         plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], c='green')
 
+        plt.title('WEBNLG, Ours w DV')
         plt.tight_layout()
-        plt.savefig('tsne_plot.png')
+        plt.legend()
+        plt.savefig('tsne_plot_dyn_weight.png')
         plt.show()
 
         print("done plotting")
