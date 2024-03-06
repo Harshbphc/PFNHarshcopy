@@ -169,7 +169,7 @@ if __name__ == '__main__':
         # Test t-SNE plot
         plt.scatter(test_tsne[:, 0], test_tsne[:, 1], c='blue')
 
-        plt.scatter(labprevtsne[:, 0], test_tsne[:, 1], c='green')
+        plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], c='green')
 
         plt.tight_layout()
         plt.savefig('tsne_plot.png')
