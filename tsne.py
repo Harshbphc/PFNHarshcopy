@@ -108,6 +108,7 @@ if __name__ == '__main__':
     labeled_setprev_ind = np.load('labelled-head3.npy')
 
     unlabeled_set = [x for x in indices if x not in labeled_setn]
+    unlabeled_set = [:400]
 
 
     labeled_batchn = DataLoader(dataset=train_dataset, batch_size=len(labeled_setn), sampler=SubsetRandomSampler(labeled_setn), 
