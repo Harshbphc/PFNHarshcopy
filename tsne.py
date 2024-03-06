@@ -159,8 +159,10 @@ if __name__ == '__main__':
         unlab_features = unlab_features.reshape(unlab_features.shape[0],-1)
         lab_featuresprev = lab_featuresprev.reshape(lab_featuresprev.shape[0],-1)
 
-
-        X = np.concatenate([lab_features,unlab_features,lab_featuresprev],axis=0).numpy()
+        lab_features = lab_features.numpy()
+        unlab_features = unlab_features.numpy()
+        lab_featuresprev = lab_featuresprev.numpy()
+        X = np.concatenate([lab_features,unlab_features,lab_featuresprev],axis=0)
         train_tsne = tsne.fit_transform(X)
         # test_tsne = tsne.fit_transform(unlab_features)
         # labprevtsne = tsne.fit_transform(lab_featuresprev)
