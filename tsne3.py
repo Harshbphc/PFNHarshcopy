@@ -158,20 +158,24 @@ if __name__ == '__main__':
         lab_features = lab_features.reshape(lab_features.shape[0],-1)
         unlab_features = unlab_features.reshape(unlab_features.shape[0],-1)
         lab_featuresprev = lab_featuresprev.reshape(lab_featuresprev.shape[0],-1)
-        train_tsne = tsne.fit_transform(lab_features)
-        test_tsne = tsne.fit_transform(unlab_features)
-        labprevtsne = tsne.fit_transform(lab_featuresprev)
+        lab_features = lab_features.numpy()
+        unlab_features = unlab_features.numpy()
+        lab_featuresprev = lab_featuresprev.numpy()
+        X = np.concatenate([lab_features,unlab_features,lab_featuresprev],axis=0)
+        train_tsne = tsne.fit_transform(X)
+        # test_tsne = tsne.fit_transform(unlab_features)
+        # labprevtsne = tsne.fit_transform(lab_featuresprev)
 
         # Step 5: Visualize t-SNE plots
         plt.figure(figsize=(10, 5))
 
         # Train t-SNE plot
-        plt.scatter(train_tsne[:, 0], train_tsne[:, 1],label='Newly added samples',c='red')
+        plt.scatter(train_tsne[:len(lab_features), 0], train_tsne[:len(lab_features), 1],label='Newly added samples',c='red')
 
         # Test t-SNE plot
-        plt.scatter(test_tsne[:, 0], test_tsne[:, 1], label='Unlabeled samples',c='blue')
+        plt.scatter(train_tsne[len(lab_features):len(lab_features)+len(unlab_features), 0], train_tsne[len(lab_features):len(lab_features)+len(unlab_features), 1], label='Unlabeled samples',c='blue')
 
-        plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], label='Prev labeled samples',c='green')
+        plt.scatter(train_tsne[len(lab_features)+len(unlab_features):, 0], train_tsne[len(lab_features)+len(unlab_features):, 1], label='Prev labeled samples',c='green')
 
         plt.title('WEBNLG, Ours w DV - Cycle 7')
         plt.tight_layout()
