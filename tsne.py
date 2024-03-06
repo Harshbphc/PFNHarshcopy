@@ -123,7 +123,7 @@ if __name__ == '__main__':
             re_label = data[2].to(device)
             mask = data[-1].to(device)
 
-            ner_labpred, re_labpred, features = model(text, mask)
+            ner_score, re_core, features, out4 = model(text, mask)
             ner_labpred = ner_labpred.transpose(1,2)
             ner_labpred = ner_labpred.transpose(0,1)
             re_labpred = re_labpred.transpose(1,2)
@@ -143,7 +143,7 @@ if __name__ == '__main__':
             re_label = data[2].to(device)
             mask = data[-1].to(device)
 
-            ner_unlabpred, re_unlabpred, features = model(text, mask)
+            ner_score, re_core, features, out4 = model(text, mask)
 
             ner_unlabpred = ner_unlabpred.transpose(1,2)
             ner_unlabpred = ner_unlabpred.transpose(0,1)
@@ -164,7 +164,7 @@ if __name__ == '__main__':
             re_label = data[2].to(device)
             mask = data[-1].to(device)
 
-            ner_labpred, re_labpred, features = model(text, mask)
+            ner_score, re_core, features, out4 = model(text, mask)
             ner_labpred = ner_labpred.transpose(1,2)
             ner_labpred = ner_labpred.transpose(0,1)
             re_labpred = re_labpred.transpose(1,2)
