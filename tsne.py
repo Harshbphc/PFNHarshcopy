@@ -166,12 +166,12 @@ if __name__ == '__main__':
         plt.figure(figsize=(10, 5))
 
         # Train t-SNE plot
-        plt.scatter(train_tsne[:, 0], train_tsne[:, 1],c='red')
+        plt.scatter(train_tsne[:, 0], train_tsne[:, 1],label='Newly added samples',c='red')
 
         # Test t-SNE plot
-        plt.scatter(test_tsne[:, 0], test_tsne[:, 1], c='blue')
+        plt.scatter(test_tsne[:, 0], test_tsne[:, 1], label='Unlabeled samples',c='blue')
 
-        plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], c='green')
+        plt.scatter(labprevtsne[:, 0], labprevtsne[:, 1], label='Labeled samples in prev cycle',c='green')
 
         plt.title('WEBNLG, Ours w DV')
         plt.tight_layout()
