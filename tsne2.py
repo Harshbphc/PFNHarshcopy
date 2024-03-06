@@ -107,7 +107,7 @@ if __name__ == '__main__':
     labeled_setn = np.load('labelled-head5.npy')
     labeled_setprev_ind = np.load('labelled-head4.npy')
 
-    unlabeled_set = [x for x in indices if x not in labeled_setn]
+    unlabeled_set = [x for x in indices if x not in labeled_setprev_ind]
     unlabeled_set = unlabeled_set[:400]
 
     labeled_setn = np.setdiff1d(labeled_setn, labeled_setprev_ind)
