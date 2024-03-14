@@ -337,8 +337,8 @@ class PFN(nn.Module):
 
         h_ner, h_re, h_share = self.feature_extractor(x)
 
-        ner_score = self.ner(h_ner, h_share, mask)
-        re_core = self.re(h_re, h_share, mask)
+        ner_score = self.ner(h_ner, h_ner, mask)
+        re_core = self.re(h_re, h_re, mask)
         # print(re_core.shape)
         features = [out1,out2,out3,out4]
         return ner_score, re_core, features
