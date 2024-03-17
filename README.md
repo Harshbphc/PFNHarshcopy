@@ -1,5 +1,5 @@
 # PFN (Partition Filter Network)
-This repository contains codes of the NLP experiments carried out MJSAR paper.
+This repository contains codes of the NLP experiments carried out MJSR-AL paper.
 
 ## Quick links
 * [Model Overview](#Model-Overview)
