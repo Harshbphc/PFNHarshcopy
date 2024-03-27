@@ -126,7 +126,7 @@ if __name__ == '__main__':
             re_label = data[2].to(device)
             mask = data[-1].to(device)
 
-            ner_score, re_core, features, out4 = model(text, mask)
+            ner_score, re_core, features= model(text, mask)
 
             lab_features = features[-1]
 
@@ -136,7 +136,7 @@ if __name__ == '__main__':
             re_label = data[2].to(device)
             mask = data[-1].to(device)
 
-            ner_score, re_core, features, out4 = model(text, mask)
+            ner_score, re_core, features = model(text, mask)
 
 
             unlab_features = features[-1]
@@ -147,7 +147,7 @@ if __name__ == '__main__':
             re_label = data[2].to(device)
             mask = data[-1].to(device)
 
-            ner_score, re_core, features, out4 = model(text, mask)
+            ner_score, re_core, features= model(text, mask)
 
             lab_featuresprev = features[-1]
         tsne = TSNE(n_components=2,random_state=42,perplexity=10)
