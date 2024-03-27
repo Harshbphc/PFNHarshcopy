@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
         plt.scatter(train_tsne[len(lab_features)+len(unlab_features):, 0], train_tsne[len(lab_features)+len(unlab_features):, 1], label='Prev labeled samples',c='green')
 
-        plt.title('WEBNLG, Core-Set - Cycle 6')
+        plt.title('SCIERC, Core-Set - Cycle 6')
         plt.tight_layout()
         plt.legend()
         plt.savefig('tsne_plot_coreset_cycle6.png')
