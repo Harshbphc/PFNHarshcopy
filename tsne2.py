@@ -87,9 +87,9 @@ if __name__ == '__main__':
 
 
        
-    with open(args.data + "/ner2idx.json", "r") as f:
+    with open('data'+args.data + "/ner2idx.json", "r") as f:
         ner2idx = json.load(f)
-    with open(args.data + "/rel2idx.json", "r") as f:
+    with open('data'+args.data + "/rel2idx.json", "r") as f:
         rel2idx = json.load(f)
 
     if args.embed_mode == "albert":
