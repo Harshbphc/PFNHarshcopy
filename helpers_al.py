@@ -170,7 +170,7 @@ def train_vaal(models, optimizers, labeled_dataloader, unlabeled_dataloader, cyc
     train_iterations = 100 # int( (args['INCREMENTAL']*cycle+ args['SUBSET']) * args['EPOCHV'] / args['BATCH'] )
     print('Num of Iteration:', str(train_iterations))
     
-    for iter_count in range(train_iterations): #2
+    for iter_count in range(train_iterations):
         data_sub_label = next(labeled_data)
         labeled_imgs = data_sub_label[0]
         lab_img_dup = labeled_imgs
@@ -289,6 +289,8 @@ def train_vaal(models, optimizers, labeled_dataloader, unlabeled_dataloader, cyc
                 # labels = labels.to(device)                
 
         # Discriminator step
+        weight = 1 #(num_class1 + num_class2)/(2 * len(labeled_dataloader))
+
         for count in range(num_adv_steps):
             with torch.no_grad():
                 _, _, mu, _ = vae(r_l_s,labeled_imgs)
@@ -305,7 +307,7 @@ def train_vaal(models, optimizers, labeled_dataloader, unlabeled_dataloader, cyc
             
             dsc_loss = bce_loss(labeled_preds[:,0], lab_real_preds) + \
                        bce_loss(unlabeled_preds[:,0], unlab_fake_preds)
-
+            dsc_loss = weight * dsc_loss
             optimizers['discriminator'].zero_grad()
             dsc_loss.backward()
             optimizers['discriminator'].step()

@@ -20,7 +20,7 @@ from torch.utils.data import Dataset,DataLoader
 from helpers_al import VAE, query_samples, Discriminator
 
 
-def train(args, model, train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch):
+def train(args, model, train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch, loss_module):
     for epoch in range(args.epoch):#1
         steps, train_loss = 0, 0
 
@@ -349,7 +349,7 @@ if __name__ == '__main__':
             random.shuffle(unlabeled_set)
             subset = unlabeled_set[:50]
 
-            train(args, models['backbone'], train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch)
+            train(args, models['backbone'], train_batch, optimizer, BCEloss, dev_batch, rel2idx, ner2idx, test_batch,models['module'])
             torch.save(models['backbone'], 'predictor-backbone-' + 'cycle-'+str(cycle+1)+'.pth')
             torch.save(models['module'], 'predictor-module-'+'cycle-'+str(cycle+1)+'.pth')
             arg = query_samples(models, method, train_unlabeled, subset, labeled_set, cycle, args,collate_fn)
